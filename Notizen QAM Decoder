@@ -1,0 +1,16 @@
+Notizen QAM Decoder:
+
+Zur vereinfachung: Gleich mehrere Perioden einlesen.
+	1. Frequenz herausfinden (maxima + minima + 0-Durchgänge)
+	2. Abtast Richtwert: 32 mal pro Periode.
+	
+Gewünschte Einstellmöglichkeiten des Senders
+Einstellbare Trägerfrequenz.
+QAM ordnung 4/16
+Protokoll Handler (Header, Synch, Quersumme…)Source bei Sender (UART, I2C)
+
+Empfänger
+Empfangenes signal muss zu I2C/UART gewandelt werden.
+Protokoll Handler definition:
+- Header 
+- ?

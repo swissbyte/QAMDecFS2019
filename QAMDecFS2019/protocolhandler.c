@@ -42,7 +42,7 @@ EventGroupHandle_t xStatus;									// auch irgendwas von Cedi
 EventGroupHandle_t xProtocolBufferStatus;					// Eventbits for Buffer-Status
 
 TaskHandle_t SendTask;
-xQueueHandle xALDPQueue;									// Queue from Protocolhander to Main-Task
+xQueueHandle xALDPQueue;									// Queue from Protocolhandler to Main-Task
 
 //globale Variablen
 uint8_t ucglobalProtocolBuffer_A[PROTOCOLBUFFERSIZE] = {};	// Buffer_A from Demodulator to ProtocolTask
@@ -54,10 +54,22 @@ void vProtokollHandlerTask(void *pvParameters) {
 
 	struct ALDP_t_class *xALDP_Paket;
 	struct SLDP_t_class xSLDP_Paket;
+	uint8_t ucBufferPosition = 0;								// position inside the used buffer (A or B)
 	
 	xALDPQueue = xQueueCreate(ANZSENDQUEUE, sizeof(uint8_t));
 
-	
+	for(;;) {
+		
+		if (xEventGroupGetBits(xALDPQueue) & BUFFER_A_freetouse) {
+			xEventGroupClearBits(xALDPQueue, BUFFER_A_freetouse );
+			
+			xSLDP_Paket.sldp_size = ucglobalProtocolBuffer_A[ucBufferPosition];
+			xSLDP_Paket.sldp_crc8 = ucglobalProtocolBuffer_A[ucBufferPosition+1+xSLDP_Paket.sldp_size];
+			xSLDP_Paket.sldp_payload = &ucglobalProtocolBuffer_A[ucBufferPosition+1];
+			xALDP_Paket = (struct ALDP_t_class *)xSLDP_Paket.sldp_payload;
+			
+		}
+		
 
 
 
@@ -71,7 +83,6 @@ void vProtokollHandlerTask(void *pvParameters) {
 
 
 
-
-
-
+		vTaskDelay(50 / portTICK_RATE_MS);				// Delay 50ms
+	}
 }

@@ -60,11 +60,17 @@ c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/..
 Allocating common symbols
 Common symbol       size              file
 
+xProtocolBufferStatus
+                    0x2               protocolhandler.o
+SendTask            0x2               protocolhandler.o
+xStatus             0x2               protocolhandler.o
 displayLineQueue    0x2               NHD0420Driver.o
 ledTask             0x2               main.o
 egDisplayTiming     0x2               NHD0420Driver.o
 intTaskSwitchPending
                     0x1               FreeRTOS/port.o
+xALDPQueue          0x2               protocolhandler.o
+xSettings           0x2               protocolhandler.o
 
 Discarded input sections
 
@@ -439,6 +445,26 @@ Discarded input sections
                 0x00000000        0x8 NHD0420Driver.o
  .text._displayClear
                 0x00000000       0x14 NHD0420Driver.o
+ .text          0x00000000        0x0 protocolhandler.o
+ .data          0x00000000        0x0 protocolhandler.o
+ .bss           0x00000000        0x0 protocolhandler.o
+ .text.vProtokollHandlerTask
+                0x00000000       0x14 protocolhandler.o
+ .bss.ucglobalProtocolBuffer_B
+                0x00000000       0x20 protocolhandler.o
+ .bss.ucglobalProtocolBuffer_A
+                0x00000000       0x20 protocolhandler.o
+ .debug_info    0x00000000      0x21d protocolhandler.o
+ .debug_abbrev  0x00000000       0xf0 protocolhandler.o
+ .debug_loc     0x00000000       0x26 protocolhandler.o
+ .debug_aranges
+                0x00000000       0x20 protocolhandler.o
+ .debug_ranges  0x00000000       0x10 protocolhandler.o
+ .debug_line    0x00000000      0x108 protocolhandler.o
+ .debug_str     0x00000000      0x2cd protocolhandler.o
+ .comment       0x00000000       0x31 protocolhandler.o
+ .debug_frame   0x00000000       0x24 protocolhandler.o
+ COMMON         0x00000000        0xa protocolhandler.o
  .text          0x00000000        0x0 utils.o
  .data          0x00000000        0x0 utils.o
  .bss           0x00000000        0x0 utils.o
@@ -611,6 +637,7 @@ LOAD init.o
 LOAD main.o
 LOAD mem_check.o
 LOAD NHD0420Driver.o
+LOAD protocolhandler.o
 LOAD utils.o
 START GROUP
 LOAD c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/../../../../avr/lib/avrxmega6\libm.a
@@ -1275,6 +1302,7 @@ END GROUP
                 0x00802000                PROVIDE (__data_start, .)
  *(.data)
  *(.data*)
+ *(.gnu.linkonce.d*)
  *(.rodata)
  *(.rodata*)
  .rodata.str1.1
@@ -1285,7 +1313,7 @@ END GROUP
                 0x0080200d       0x3f main.o
  .rodata.str1.1
                 0x0080204c        0xb NHD0420Driver.o
- *(.gnu.linkonce.d*)
+ *(.gnu.linkonce.r*)
                 0x00802058                . = ALIGN (0x2)
  *fill*         0x00802057        0x1 
                 0x00802058                _edata = .
@@ -1410,7 +1438,7 @@ END GROUP
 .stab.indexstr
  *(.stab.indexstr)
 
-.comment        0x00000000       0x30
+.comment        0x00000000       0x60
  *(.comment)
  .comment       0x00000000       0x30 driver/clksys_driver.o
                                  0x31 (size before relaxing)
@@ -1424,10 +1452,11 @@ END GROUP
  .comment       0x00000030       0x31 FreeRTOS/tasks.o
  .comment       0x00000030       0x31 FreeRTOS/timers.o
  .comment       0x00000030       0x31 init.o
- .comment       0x00000030       0x31 main.o
- .comment       0x00000030       0x31 mem_check.o
- .comment       0x00000030       0x31 NHD0420Driver.o
- .comment       0x00000030       0x31 utils.o
+ .comment       0x00000030       0x30 main.o
+                                 0x31 (size before relaxing)
+ .comment       0x00000060       0x31 mem_check.o
+ .comment       0x00000060       0x31 NHD0420Driver.o
+ .comment       0x00000060       0x31 utils.o
 
 .note.gnu.avr.deviceinfo
                 0x00000000       0x40
@@ -1560,7 +1589,7 @@ END GROUP
  .debug_frame   0x000014c4      0x278 NHD0420Driver.o
  .debug_frame   0x0000173c       0x24 utils.o
 
-.debug_str      0x00000000     0x5506
+.debug_str      0x00000000     0x5536
  *(.debug_str)
  .debug_str     0x00000000     0x223b C:/Program Files (x86)/Atmel/Studio/7.0/Packs/Atmel/XMEGAA_DFP/1.1.68/gcc/dev/atxmega128a3u/avrxmega6/crtatxmega128a3u.o
  .debug_str     0x0000223b      0x797 driver/clksys_driver.o
@@ -1585,13 +1614,13 @@ END GROUP
                                 0x8fe (size before relaxing)
  .debug_str     0x000050ec       0x17 init.o
                                 0x523 (size before relaxing)
- .debug_str     0x00005103      0x193 main.o
-                                0x3c1 (size before relaxing)
- .debug_str     0x00005296       0x49 mem_check.o
+ .debug_str     0x00005103      0x1c3 main.o
+                                0x3a0 (size before relaxing)
+ .debug_str     0x000052c6       0x49 mem_check.o
                                 0x1c7 (size before relaxing)
- .debug_str     0x000052df      0x20e NHD0420Driver.o
+ .debug_str     0x0000530f      0x20e NHD0420Driver.o
                                 0xacd (size before relaxing)
- .debug_str     0x000054ed       0x19 utils.o
+ .debug_str     0x0000551d       0x19 utils.o
                                 0x251 (size before relaxing)
 
 .debug_loc      0x00000000     0x8cb6

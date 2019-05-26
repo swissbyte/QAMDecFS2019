@@ -2,7 +2,7 @@
  * protocolhandler.c
  *
  * Created: 25.05.2019 13:28:40
- *  Author: PhilippAdmin
+ *  Author: philippeppler
  */ 
 
 #include "avr_compiler.h"
@@ -35,6 +35,9 @@
 // xProtocolBufferStatus
 #define BUFFER_A_freetouse				1<<0
 #define BUFFER_B_freetouse				1<<1
+// Buffer
+#define ACTIVEBUFFER_A					0
+#define ACTIVEBUFFER_B					1
 
 EventGroupHandle_t xSettings;								// Settings vom GUI von Cedi
 EventGroupHandle_t xStatus;									// auch irgendwas von Cedi
@@ -44,39 +47,72 @@ EventGroupHandle_t xProtocolBufferStatus;					// Eventbits for Buffer-Status
 xQueueHandle xALDPQueue;									// Queue from Protocolhandler to Main-Task
 
 //globale Variablen
-uint8_t ucglobalProtocolBuffer_A[PROTOCOLBUFFERSIZE] = {};	// Buffer_A from Demodulator to ProtocolTask
-uint8_t ucglobalProtocolBuffer_B[PROTOCOLBUFFERSIZE] = {};	// Buffer_B from Demodulator to ProtocolTask
+uint8_t ucglobalProtocolBuffer_A[PROTOCOLBUFFERSIZE] = {8,1,2,3,4,5,6,7,8,66,8,1,2,3,4,5,6,7,8,66,8,1,2,3,4,5,6,7,8,66,8,1};	// Buffer_A from Demodulator to ProtocolTask
+uint8_t ucglobalProtocolBuffer_B[PROTOCOLBUFFERSIZE] = {2,3,4,5,6,7,8,66,8,1,2,3,4,5,6,7,8,66,8,1,2,3,4,5,6,7,8,66,2,1,2,66};	// Buffer_B from Demodulator to ProtocolTask
 
 
-void vProtokollHandlerTask(void *pvParameters) {
+void vProtocolHandlerTask(void *pvParameters) {
 	(void) pvParameters;
 
 	struct ALDP_t_class *xALDP_Paket;
 	struct SLDP_t_class xSLDP_Paket;
+	
+	xProtocolBufferStatus = xEventGroupCreate();
+	
+	PORTF.DIRSET = PIN0_bm; /*LED1*/
+	PORTF.OUT = 0x01;
+	
 	uint8_t ucBuffer_A_Position = 0;								// position inside the used buffer (A or B)
 	uint8_t ucBuffer_B_Position = 0;								// position inside the used buffer (A or B)
+	
+	uint8_t ucactiveBuffer = ACTIVEBUFFER_A;
 	
 	uint8_t ucBufferSLDPpayloadInput[]= {};
 	uint8_t ucBufferSLDPpayloadInputCounter;
 	
 	xALDPQueue = xQueueCreate(ANZSENDQUEUE, sizeof(uint8_t));
+	
+	// Debugging
+	xEventGroupSetBits(xProtocolBufferStatus, BUFFER_A_freetouse);
+	xEventGroupSetBits(xProtocolBufferStatus, BUFFER_B_freetouse);
+	
+	
+	
 
 	for(;;) {
 		
-		if (xEventGroupGetBits(xProtocolBufferStatus) & BUFFER_A_freetouse) {
-			xEventGroupClearBits(xProtocolBufferStatus, BUFFER_A_freetouse );
-			xSLDP_Paket.sldp_size = ucglobalProtocolBuffer_A[ucBuffer_A_Position];
+		PORTF.OUTTGL = 0x01;
+		
+		xSLDP_Paket.sldp_size = ucglobalProtocolBuffer_A[ucBuffer_A_Position];
 			
-			for (ucBufferSLDPpayloadInputCounter = 0; ucBufferSLDPpayloadInputCounter < xSLDP_Paket.sldp_size; ucBufferSLDPpayloadInputCounter++) {
-			
-				for (ucBuffer_A_Position = xSLDP_Paket.sldp_size; ucBuffer_A_Position < PROTOCOLBUFFERSIZE; ucBuffer_A_Position++) {
-					ucBufferSLDPpayloadInput[ucBufferSLDPpayloadInputCounter] = ucglobalProtocolBuffer_A[ucBuffer_A_Position];
-			
-				}
-			
-			
-			
+		for (ucBufferSLDPpayloadInputCounter = 0; ucBufferSLDPpayloadInputCounter < xSLDP_Paket.sldp_size; ucBufferSLDPpayloadInputCounter++) {
+				
+			// Bufferhandler
+			if (ucBuffer_A_Position >= (PROTOCOLBUFFERSIZE-1)) {
+				ucactiveBuffer = ACTIVEBUFFER_B;
+				ucBuffer_A_Position = 0;
 			}
+				
+			if (ucBuffer_B_Position >= (PROTOCOLBUFFERSIZE-1)) {
+				ucactiveBuffer = ACTIVEBUFFER_A;
+				ucBuffer_B_Position = 0;
+			}
+				
+				
+			if (ucactiveBuffer == ACTIVEBUFFER_A) {
+				xEventGroupWaitBits(xProtocolBufferStatus, BUFFER_A_freetouse, pdTRUE, pdFALSE, portMAX_DELAY);					// wait for Buffer A
+				ucBufferSLDPpayloadInput[ucBufferSLDPpayloadInputCounter] = ucglobalProtocolBuffer_A[ucBuffer_A_Position];		
+				ucBuffer_A_Position++;
+				xEventGroupSetBits(xProtocolBufferStatus, BUFFER_A_freetouse);													// Buffer A release
+			}
+			else if (ucactiveBuffer == ACTIVEBUFFER_B) {
+				xEventGroupWaitBits(xProtocolBufferStatus, BUFFER_B_freetouse, pdTRUE, pdFALSE, portMAX_DELAY);					// wait for Buffer A
+				ucBufferSLDPpayloadInput[ucBufferSLDPpayloadInputCounter] = ucglobalProtocolBuffer_B[ucBuffer_B_Position];
+				ucBuffer_B_Position++;
+				xEventGroupSetBits(xProtocolBufferStatus, BUFFER_B_freetouse);													// Buffer A release
+			}
+
+		}
 
 			
 			
@@ -86,7 +122,6 @@ void vProtokollHandlerTask(void *pvParameters) {
 			xSLDP_Paket.sldp_payload = &ucglobalProtocolBuffer_A[ucBufferPosition+1];
 			xALDP_Paket = (struct ALDP_t_class *)xSLDP_Paket.sldp_payload;*/
 			
-		}
 		
 
 

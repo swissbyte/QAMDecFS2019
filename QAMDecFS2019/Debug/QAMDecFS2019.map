@@ -62,7 +62,6 @@ Common symbol       size              file
 
 xProtocolBufferStatus
                     0x2               protocolhandler.o
-SendTask            0x2               protocolhandler.o
 xStatus             0x2               protocolhandler.o
 displayLineQueue    0x2               NHD0420Driver.o
 ledTask             0x2               main.o
@@ -449,22 +448,22 @@ Discarded input sections
  .data          0x00000000        0x0 protocolhandler.o
  .bss           0x00000000        0x0 protocolhandler.o
  .text.vProtokollHandlerTask
-                0x00000000       0x4a protocolhandler.o
+                0x00000000       0x7a protocolhandler.o
  .bss.ucglobalProtocolBuffer_B
                 0x00000000       0x20 protocolhandler.o
  .bss.ucglobalProtocolBuffer_A
                 0x00000000       0x20 protocolhandler.o
- .debug_info    0x00000000      0x2b7 protocolhandler.o
- .debug_abbrev  0x00000000      0x10f protocolhandler.o
- .debug_loc     0x00000000       0x26 protocolhandler.o
+ .debug_info    0x00000000      0x2de protocolhandler.o
+ .debug_abbrev  0x00000000      0x127 protocolhandler.o
+ .debug_loc     0x00000000       0xb2 protocolhandler.o
  .debug_aranges
                 0x00000000       0x20 protocolhandler.o
  .debug_ranges  0x00000000       0x10 protocolhandler.o
- .debug_line    0x00000000      0x12f protocolhandler.o
- .debug_str     0x00000000      0x312 protocolhandler.o
+ .debug_line    0x00000000      0x167 protocolhandler.o
+ .debug_str     0x00000000      0x356 protocolhandler.o
  .comment       0x00000000       0x31 protocolhandler.o
  .debug_frame   0x00000000       0x24 protocolhandler.o
- COMMON         0x00000000        0xa protocolhandler.o
+ COMMON         0x00000000        0x8 protocolhandler.o
  .text          0x00000000        0x0 utils.o
  .data          0x00000000        0x0 utils.o
  .bss           0x00000000        0x0 utils.o

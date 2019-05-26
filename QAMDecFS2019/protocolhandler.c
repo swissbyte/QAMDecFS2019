@@ -41,7 +41,6 @@ EventGroupHandle_t xStatus;									// auch irgendwas von Cedi
 
 EventGroupHandle_t xProtocolBufferStatus;					// Eventbits for Buffer-Status
 
-TaskHandle_t SendTask;
 xQueueHandle xALDPQueue;									// Queue from Protocolhandler to Main-Task
 
 //globale Variablen
@@ -54,19 +53,38 @@ void vProtokollHandlerTask(void *pvParameters) {
 
 	struct ALDP_t_class *xALDP_Paket;
 	struct SLDP_t_class xSLDP_Paket;
-	uint8_t ucBufferPosition = 0;								// position inside the used buffer (A or B)
+	uint8_t ucBuffer_A_Position = 0;								// position inside the used buffer (A or B)
+	uint8_t ucBuffer_B_Position = 0;								// position inside the used buffer (A or B)
+	
+	uint8_t ucBufferSLDPpayloadInput[]= {};
+	uint8_t ucBufferSLDPpayloadInputCounter;
 	
 	xALDPQueue = xQueueCreate(ANZSENDQUEUE, sizeof(uint8_t));
 
 	for(;;) {
 		
-		if (xEventGroupGetBits(xALDPQueue) & BUFFER_A_freetouse) {
-			xEventGroupClearBits(xALDPQueue, BUFFER_A_freetouse );
+		if (xEventGroupGetBits(xProtocolBufferStatus) & BUFFER_A_freetouse) {
+			xEventGroupClearBits(xProtocolBufferStatus, BUFFER_A_freetouse );
+			xSLDP_Paket.sldp_size = ucglobalProtocolBuffer_A[ucBuffer_A_Position];
 			
-			xSLDP_Paket.sldp_size = ucglobalProtocolBuffer_A[ucBufferPosition];
+			for (ucBufferSLDPpayloadInputCounter = 0; ucBufferSLDPpayloadInputCounter < xSLDP_Paket.sldp_size; ucBufferSLDPpayloadInputCounter++) {
+			
+				for (ucBuffer_A_Position = xSLDP_Paket.sldp_size; ucBuffer_A_Position < PROTOCOLBUFFERSIZE; ucBuffer_A_Position++) {
+					ucBufferSLDPpayloadInput[ucBufferSLDPpayloadInputCounter] = ucglobalProtocolBuffer_A[ucBuffer_A_Position];
+			
+				}
+			
+			
+			
+			}
+
+			
+			
+			
+			/*
 			xSLDP_Paket.sldp_crc8 = ucglobalProtocolBuffer_A[ucBufferPosition+1+xSLDP_Paket.sldp_size];
 			xSLDP_Paket.sldp_payload = &ucglobalProtocolBuffer_A[ucBufferPosition+1];
-			xALDP_Paket = (struct ALDP_t_class *)xSLDP_Paket.sldp_payload;
+			xALDP_Paket = (struct ALDP_t_class *)xSLDP_Paket.sldp_payload;*/
 			
 		}
 		

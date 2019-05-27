@@ -16,6 +16,7 @@
 // KONSTANTEN
 #define ANZSENDQUEUE					32
 #define	PROTOCOLBUFFERSIZE				32
+#define SLDPPAYLOADMAXSIZE				256
 // xQuelle
 #define PAKET_TYPE_ALDP					0x01
 #define ALDP_SRC_UART					0x00
@@ -47,9 +48,13 @@ EventGroupHandle_t xProtocolBufferStatus;					// Eventbits for Buffer-Status
 xQueueHandle xALDPQueue;									// Queue from Protocolhandler to Main-Task
 
 //globale Variablen
+uint8_t ucglobalProtocolBuffer_A[PROTOCOLBUFFERSIZE] = {};	// Buffer_A from Demodulator to ProtocolTask
+uint8_t ucglobalProtocolBuffer_B[PROTOCOLBUFFERSIZE] = {};	// Buffer_B from Demodulator to ProtocolTask
+
+/* Debug (Testpattern)
 uint8_t ucglobalProtocolBuffer_A[PROTOCOLBUFFERSIZE] = {8,1,6,3,4,5,6,7,8,66,8,1,6,1,2,3,4,5,6,66,8,0,6,6,7,8,9,10,11,66,8,1};	// Buffer_A from Demodulator to ProtocolTask
 uint8_t ucglobalProtocolBuffer_B[PROTOCOLBUFFERSIZE] = {6,3,4,5,6,7,8,66,8,1,6,3,4,5,6,7,8,66,8,1,6,3,4,5,6,7,8,66,2,1,0,66};	// Buffer_B from Demodulator to ProtocolTask
-
+*/
 
 void vProtocolHandlerTask(void *pvParameters) {
 	(void) pvParameters;
@@ -67,15 +72,16 @@ void vProtocolHandlerTask(void *pvParameters) {
 	
 	uint8_t ucactiveBuffer = ACTIVEBUFFER_A;
 	
-	uint8_t ucBufferSLDPpayloadInput[256]= {};
+	uint8_t ucBufferSLDPpayloadInput[SLDPPAYLOADMAXSIZE]= {};		// not ideal, but no better solution found
 	uint8_t ucBufferSLDPpayloadInputCounter;
 	
 	xALDPQueue = xQueueCreate(ANZSENDQUEUE, sizeof(uint8_t));
+
 	
-	// Debugging
+/* Debugging
 	xEventGroupSetBits(xProtocolBufferStatus, BUFFER_A_freetouse);
 	xEventGroupSetBits(xProtocolBufferStatus, BUFFER_B_freetouse);
-	
+*/	
 	
 	
 
@@ -98,7 +104,7 @@ void vProtocolHandlerTask(void *pvParameters) {
 				ucBuffer_B_Position = 0;
 			}
 				
-				
+			// write from Doublebuffer into Protocolbuffer	
 			if (ucactiveBuffer == ACTIVEBUFFER_A) {
 				xEventGroupWaitBits(xProtocolBufferStatus, BUFFER_A_freetouse, pdTRUE, pdFALSE, portMAX_DELAY);					// wait for Buffer A
 				ucBufferSLDPpayloadInput[ucBufferSLDPpayloadInputCounter] = ucglobalProtocolBuffer_A[ucBuffer_A_Position];		
@@ -116,7 +122,7 @@ void vProtocolHandlerTask(void *pvParameters) {
 
 		ucBufferSLDPpayloadInputCounter--;	
 			
-			
+		// fill SLDP and ALDP	
 		xSLDP_Paket.sldp_crc8 = ucBufferSLDPpayloadInput[ucBufferSLDPpayloadInputCounter];									// TODO: CRC8 überprüfen
 		xSLDP_Paket.sldp_payload = &ucBufferSLDPpayloadInput[1];
 			
@@ -128,12 +134,13 @@ void vProtocolHandlerTask(void *pvParameters) {
 		memcpy(array, xALDP_Paket->aldp_payload, xALDP_Paket->aldp_hdr_byte_2);
 */
 
+		// write ALDP Payload into ALDP-Queue
 		for (uint8_t i=0; i < xALDP_Paket->aldp_hdr_byte_2; i++) {
 			uint8_t ucSendChar = xSLDP_Paket.sldp_payload[i+2];
 			xQueueSend(xALDPQueue, &ucSendChar, portMAX_DELAY);
 		}
 
 
-		vTaskDelay(50 / portTICK_RATE_MS);				// Delay 50ms
+		vTaskDelay(200 / portTICK_RATE_MS);				// Delay 200ms
 	}
 }

@@ -47,8 +47,8 @@ EventGroupHandle_t xProtocolBufferStatus;					// Eventbits for Buffer-Status
 xQueueHandle xALDPQueue;									// Queue from Protocolhandler to Main-Task
 
 //globale Variablen
-uint8_t ucglobalProtocolBuffer_A[PROTOCOLBUFFERSIZE] = {8,1,2,3,4,5,6,7,8,66,8,1,2,3,4,5,6,7,8,66,8,1,2,3,4,5,6,7,8,66,8,1};	// Buffer_A from Demodulator to ProtocolTask
-uint8_t ucglobalProtocolBuffer_B[PROTOCOLBUFFERSIZE] = {2,3,4,5,6,7,8,66,8,1,2,3,4,5,6,7,8,66,8,1,2,3,4,5,6,7,8,66,2,1,2,66};	// Buffer_B from Demodulator to ProtocolTask
+uint8_t ucglobalProtocolBuffer_A[PROTOCOLBUFFERSIZE] = {8,1,6,3,4,5,6,7,8,66,8,1,6,1,2,3,4,5,6,66,8,0,6,6,7,8,9,10,11,66,8,1};	// Buffer_A from Demodulator to ProtocolTask
+uint8_t ucglobalProtocolBuffer_B[PROTOCOLBUFFERSIZE] = {6,3,4,5,6,7,8,66,8,1,6,3,4,5,6,7,8,66,8,1,6,3,4,5,6,7,8,66,2,1,0,66};	// Buffer_B from Demodulator to ProtocolTask
 
 
 void vProtocolHandlerTask(void *pvParameters) {
@@ -67,7 +67,7 @@ void vProtocolHandlerTask(void *pvParameters) {
 	
 	uint8_t ucactiveBuffer = ACTIVEBUFFER_A;
 	
-	uint8_t ucBufferSLDPpayloadInput[]= {};
+	uint8_t ucBufferSLDPpayloadInput[256]= {};
 	uint8_t ucBufferSLDPpayloadInputCounter;
 	
 	xALDPQueue = xQueueCreate(ANZSENDQUEUE, sizeof(uint8_t));
@@ -85,15 +85,15 @@ void vProtocolHandlerTask(void *pvParameters) {
 		
 		xSLDP_Paket.sldp_size = ucglobalProtocolBuffer_A[ucBuffer_A_Position];
 			
-		for (ucBufferSLDPpayloadInputCounter = 0; ucBufferSLDPpayloadInputCounter < xSLDP_Paket.sldp_size; ucBufferSLDPpayloadInputCounter++) {
+		for (ucBufferSLDPpayloadInputCounter = 0; ucBufferSLDPpayloadInputCounter <= (xSLDP_Paket.sldp_size+1); ucBufferSLDPpayloadInputCounter++) {
 				
 			// Bufferhandler
-			if (ucBuffer_A_Position >= (PROTOCOLBUFFERSIZE-1)) {
+			if (ucBuffer_A_Position >= (PROTOCOLBUFFERSIZE)) {
 				ucactiveBuffer = ACTIVEBUFFER_B;
 				ucBuffer_A_Position = 0;
 			}
 				
-			if (ucBuffer_B_Position >= (PROTOCOLBUFFERSIZE-1)) {
+			if (ucBuffer_B_Position >= (PROTOCOLBUFFERSIZE)) {
 				ucactiveBuffer = ACTIVEBUFFER_A;
 				ucBuffer_B_Position = 0;
 			}
@@ -114,18 +114,20 @@ void vProtocolHandlerTask(void *pvParameters) {
 
 		}
 
+		ucBufferSLDPpayloadInputCounter--;	
 			
 			
 			
-			/*
-			xSLDP_Paket.sldp_crc8 = ucglobalProtocolBuffer_A[ucBufferPosition+1+xSLDP_Paket.sldp_size];
-			xSLDP_Paket.sldp_payload = &ucglobalProtocolBuffer_A[ucBufferPosition+1];
-			xALDP_Paket = (struct ALDP_t_class *)xSLDP_Paket.sldp_payload;*/
+		xSLDP_Paket.sldp_crc8 = ucBufferSLDPpayloadInput[ucBufferSLDPpayloadInputCounter];
+		xSLDP_Paket.sldp_payload = &ucBufferSLDPpayloadInput[1];
+			
+		xALDP_Paket = (struct ALDP_t_class *)xSLDP_Paket.sldp_payload;
 			
 		
+		
+		uint8_t array[256]={};
 
-
-
+		memcpy(array, xALDP_Paket->aldp_payload, xALDP_Paket->aldp_hdr_byte_2);
 
 
 

@@ -117,25 +117,21 @@ void vProtocolHandlerTask(void *pvParameters) {
 		ucBufferSLDPpayloadInputCounter--;	
 			
 			
-			
-		xSLDP_Paket.sldp_crc8 = ucBufferSLDPpayloadInput[ucBufferSLDPpayloadInputCounter];
+		xSLDP_Paket.sldp_crc8 = ucBufferSLDPpayloadInput[ucBufferSLDPpayloadInputCounter];									// TODO: CRC8 überprüfen
 		xSLDP_Paket.sldp_payload = &ucBufferSLDPpayloadInput[1];
 			
 		xALDP_Paket = (struct ALDP_t_class *)xSLDP_Paket.sldp_payload;
 			
 		
-		
+/* Debug
 		uint8_t array[256]={};
-
 		memcpy(array, xALDP_Paket->aldp_payload, xALDP_Paket->aldp_hdr_byte_2);
+*/
 
-
-
-
-
-
-
-
+		for (uint8_t i=0; i < xALDP_Paket->aldp_hdr_byte_2; i++) {
+			uint8_t ucSendChar = xSLDP_Paket.sldp_payload[i+2];
+			xQueueSend(xALDPQueue, &ucSendChar, portMAX_DELAY);
+		}
 
 
 		vTaskDelay(50 / portTICK_RATE_MS);				// Delay 50ms

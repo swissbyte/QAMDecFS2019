@@ -55,7 +55,7 @@ uint8_t ucGlobalProtocolBuffer_A[ PROTOCOL_BUFFER_SIZE ] = {};	// Buffer_A from 
 uint8_t ucGlobalProtocolBuffer_B[ PROTOCOL_BUFFER_SIZE ] = {};	// Buffer_B from Demodulator to ProtocolTask
 */
 /* Debug ( Testpattern ) */
-uint8_t ucGlobalProtocolBuffer_A[ PROTOCOL_BUFFER_SIZE ] = {0,1,6,3,4,5,6,7,8,66,8,1,6,1,2,3,4,5,6,66,8,0,6,6,7,8,9,10,11,66,8,1};	// Buffer_A from Demodulator to ProtocolTask
+uint8_t ucGlobalProtocolBuffer_A[ PROTOCOL_BUFFER_SIZE ] = {8,1,6,3,4,5,6,7,8,66,8,1,6,1,2,3,4,5,6,66,8,0,6,6,7,8,9,10,11,66,8,1};	// Buffer_A from Demodulator to ProtocolTask
 uint8_t ucGlobalProtocolBuffer_B[ PROTOCOL_BUFFER_SIZE ] = {6,3,4,5,6,7,8,66,8,1,6,3,4,5,6,7,8,66,8,1,6,3,4,5,6,7,8,66,2,1,0,66};	// Buffer_B from Demodulator to ProtocolTask
 
 
@@ -161,19 +161,49 @@ void vProtocolHandlerTask( void *pvParameters ) {
 			
 			xALDP_Paket = ( struct ALDP_t_class * )xSLDP_Paket.sldp_payload;
 			
+/* calculating CRC8 */
+			
+			uint8_t ucCRC8 = 0;
+			ucCRC8 = xCRC_calc(ucCRC8, xSLDP_Paket.sldp_size );
+			for ( uint8_t i = 0; i <= xSLDP_Paket.sldp_size; i++ ) {
+				ucCRC8 = xCRC_calc(ucCRC8, ucBufferSLDPpayloadInput[ i ] );
+			}
+
 		
-/* Debug
+/* Debug */
 			uint8_t array[ 256 ]={};
 			memcpy( array, xALDP_Paket->aldp_payload, xALDP_Paket->aldp_hdr_byte_2 );
-*/
+
 
 /* write ALDP Payload into ALDP-Queue */
 			for ( uint8_t i=0; i < xALDP_Paket->aldp_hdr_byte_2; i++ ) {
 				uint8_t ucSendChar = xSLDP_Paket.sldp_payload[ i+2 ];
 				xQueueSend( xALDPQueue, &ucSendChar, portMAX_DELAY );
 			}
-
 		}
-
 	}
+}
+
+/* CRC8 Function (ROM=39 / RAM=4 / Average => 196_Tcy / 24.5_us for 8MHz clock)    https://www.ccsinfo.com/forum/viewtopic.php?t=37015 (Original code by T. Scott Dattalo) */
+uint8_t xCRC_calc( uint8_t uiCRC, uint8_t uiCRC_data )
+{
+	uint8_t i = (uiCRC_data ^ uiCRC) & 0xff;
+	uiCRC = 0;
+	if(i & 1)
+	uiCRC ^= 0x5e;
+	if(i & 2)
+	uiCRC ^= 0xbc;
+	if(i & 4)
+	uiCRC ^= 0x61;
+	if(i & 8)
+	uiCRC ^= 0xc2;
+	if(i & 0x10)
+	uiCRC ^= 0x9d;
+	if(i & 0x20)
+	uiCRC ^= 0x23;
+	if(i & 0x40)
+	uiCRC ^= 0x46;
+	if(i & 0x80)
+	uiCRC ^= 0x8c;
+	return(uiCRC);
 }

@@ -48,12 +48,12 @@ EventGroupHandle_t xProtocolBufferStatus;					// Eventbits for Buffer-Status
 xQueueHandle xALDPQueue;									// Queue from Protocolhandler to Main-Task
 
 /* global Variables */
-uint8_t ucglobalProtocolBuffer_A[ PROTOCOL_BUFFER_SIZE ] = {};	// Buffer_A from Demodulator to ProtocolTask
-uint8_t ucglobalProtocolBuffer_B[ PROTOCOL_BUFFER_SIZE ] = {};	// Buffer_B from Demodulator to ProtocolTask
+uint8_t ucGlobalProtocolBuffer_A[ PROTOCOL_BUFFER_SIZE ] = {};	// Buffer_A from Demodulator to ProtocolTask
+uint8_t ucGlobalProtocolBuffer_B[ PROTOCOL_BUFFER_SIZE ] = {};	// Buffer_B from Demodulator to ProtocolTask
 
 /* Debug ( Testpattern )
-uint8_t ucglobalProtocolBuffer_A[ PROTOCOL_BUFFER_SIZE ] = {8,1,6,3,4,5,6,7,8,66,8,1,6,1,2,3,4,5,6,66,8,0,6,6,7,8,9,10,11,66,8,1};	// Buffer_A from Demodulator to ProtocolTask
-uint8_t ucglobalProtocolBuffer_B[ PROTOCOL_BUFFER_SIZE ] = {6,3,4,5,6,7,8,66,8,1,6,3,4,5,6,7,8,66,8,1,6,3,4,5,6,7,8,66,2,1,0,66};	// Buffer_B from Demodulator to ProtocolTask
+uint8_t ucGlobalProtocolBuffer_A[ PROTOCOL_BUFFER_SIZE ] = {8,1,6,3,4,5,6,7,8,66,8,1,6,1,2,3,4,5,6,66,8,0,6,6,7,8,9,10,11,66,8,1};	// Buffer_A from Demodulator to ProtocolTask
+uint8_t ucGlobalProtocolBuffer_B[ PROTOCOL_BUFFER_SIZE ] = {6,3,4,5,6,7,8,66,8,1,6,3,4,5,6,7,8,66,8,1,6,3,4,5,6,7,8,66,2,1,0,66};	// Buffer_B from Demodulator to ProtocolTask
 */
 
 void vProtocolHandlerTask( void *pvParameters ) {
@@ -90,7 +90,7 @@ void vProtocolHandlerTask( void *pvParameters ) {
 		
 		PORTF.OUTTGL = 0x01;
 		
-		xSLDP_Paket.sldp_size = ucglobalProtocolBuffer_A[ ucBuffer_A_Position ];
+		xSLDP_Paket.sldp_size = ucGlobalProtocolBuffer_A[ ucBuffer_A_Position ];
 			
 		for ( ucBufferSLDPpayloadInputCounter = 0; ucBufferSLDPpayloadInputCounter <= ( xSLDP_Paket.sldp_size+1 ); ucBufferSLDPpayloadInputCounter++ ) {
 				
@@ -108,13 +108,13 @@ void vProtocolHandlerTask( void *pvParameters ) {
 /* write from Doublebuffer into Protocolbuffer */
 			if ( ucActiveBuffer == ACTIVEBUFFER_A ) {
 				xEventGroupWaitBits( xProtocolBufferStatus, BUFFER_A_FreeToUse, pdTRUE, pdFALSE, portMAX_DELAY );					// wait for Buffer A
-				ucBufferSLDPpayloadInput[ ucBufferSLDPpayloadInputCounter ] = ucglobalProtocolBuffer_A[ ucBuffer_A_Position ];		
+				ucBufferSLDPpayloadInput[ ucBufferSLDPpayloadInputCounter ] = ucGlobalProtocolBuffer_A[ ucBuffer_A_Position ];		
 				ucBuffer_A_Position++;
 				xEventGroupSetBits( xProtocolBufferStatus, BUFFER_A_FreeToUse );													// Buffer A release
 			}
 			else if ( ucActiveBuffer == ACTIVEBUFFER_B ) {
 				xEventGroupWaitBits( xProtocolBufferStatus, BUFFER_B_FreeToUse, pdTRUE, pdFALSE, portMAX_DELAY );					// wait for Buffer A
-				ucBufferSLDPpayloadInput[ ucBufferSLDPpayloadInputCounter ] = ucglobalProtocolBuffer_B[ ucBuffer_B_Position ];
+				ucBufferSLDPpayloadInput[ ucBufferSLDPpayloadInputCounter ] = ucGlobalProtocolBuffer_B[ ucBuffer_B_Position ];
 				ucBuffer_B_Position++;
 				xEventGroupSetBits( xProtocolBufferStatus, BUFFER_B_FreeToUse );													// Buffer A release
 			}

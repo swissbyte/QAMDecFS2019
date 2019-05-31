@@ -12,11 +12,12 @@
 #include "event_groups.h"
 #include "protocolhandler.h"
 #include "string.h"
+#include "semphr.h"
 
 /* Constants */
 #define ANZ_SEND_QUEUE					32
-#define	PROTOCOL_BUFFER_SIZE				32
-#define SLDP_PAYLOAD_MAX_SIZE				256
+#define	PROTOCOL_BUFFER_SIZE			32
+#define SLDP_PAYLOAD_MAX_SIZE			256
 /* xQuelle */
 #define PAKET_TYPE_ALDP					0x01
 #define ALDP_SRC_UART					0x00
@@ -43,9 +44,11 @@
 EventGroupHandle_t xSettings;								// Settings vom GUI von Cedi
 EventGroupHandle_t xStatus;									// auch irgendwas von Cedi
 
-EventGroupHandle_t xProtocolBufferStatus;					// Eventbits for Buffer-Status
 
 xQueueHandle xALDPQueue;									// Queue from Protocolhandler to Main-Task
+
+SemaphoreHandle_t xGlobalProtocolBuffer_A_Key;			//A-Resource for ucGlobalProtocolBuffer_A
+SemaphoreHandle_t xGlobalProtocolBuffer_B_Key;			//A-Resource for ucGlobalProtocolBuffer_B
 
 /* global Variables 
 uint8_t ucGlobalProtocolBuffer_A[ PROTOCOL_BUFFER_SIZE ] = {};	// Buffer_A from Demodulator to ProtocolTask
@@ -62,28 +65,24 @@ void vProtocolHandlerTask( void *pvParameters ) {
 	struct ALDP_t_class *xALDP_Paket;
 	struct SLDP_t_class xSLDP_Paket;
 	
-	xProtocolBufferStatus = xEventGroupCreate(  );
-	
-
-	
 	uint8_t ucBuffer_A_Position = 0;								// position inside the used buffer ( A or B )
 	uint8_t ucBuffer_B_Position = 0;								// position inside the used buffer ( A or B )
 	
 	uint8_t ucActiveBuffer = ACTIVEBUFFER_A;
 	
-	uint8_t ucBufferSLDPpayloadInput[ SLDP_PAYLOAD_MAX_SIZE ]= {};		// not ideal, but no better solution found
+	uint8_t ucBufferSLDPpayloadInput[ SLDP_PAYLOAD_MAX_SIZE ]= {};		// could be done better maybe
 	uint8_t ucBufferSLDPpayloadInputCounter;
 	uint8_t ucValidData = pdFALSE;
+	
+	xGlobalProtocolBuffer_A_Key = xSemaphoreCreateMutex();
+	xGlobalProtocolBuffer_B_Key = xSemaphoreCreateMutex();
+	
 	xALDPQueue = xQueueCreate( ANZ_SEND_QUEUE, sizeof( uint8_t ) );
 
 	
 /* Debugging */
 	PORTF.DIRSET = PIN0_bm; //LED1
 	PORTF.OUT = 0x01;
-	xEventGroupSetBits( xProtocolBufferStatus, BUFFER_A_FreeToUse );
-	xEventGroupSetBits( xProtocolBufferStatus, BUFFER_B_FreeToUse );
-
-	
 	
 
 	for( ;; ) {
@@ -94,26 +93,29 @@ void vProtocolHandlerTask( void *pvParameters ) {
 
 /* Searching active buffer for SLDPsize not 0 (zero) */		
 		if( ucActiveBuffer == ACTIVEBUFFER_A ) {
-			// Todo take mutex
-			if( ucGlobalProtocolBuffer_A[ ucBuffer_A_Position ] != 0) {
-				xSLDP_Paket.sldp_size = ucGlobalProtocolBuffer_A[ ucBuffer_A_Position ];
-				ucValidData = pdTRUE;
+			if( xSemaphoreTake( xGlobalProtocolBuffer_A_Key, ( 50 / portTICK_RATE_MS ) ) ) {
+				if( ucGlobalProtocolBuffer_A[ ucBuffer_A_Position ] != 0) {
+					xSLDP_Paket.sldp_size = ucGlobalProtocolBuffer_A[ ucBuffer_A_Position ];
+					ucValidData = pdTRUE;
+				}
+				else {
+					ucBuffer_A_Position++;
+					ucValidData = pdFALSE;
+				}
+				xSemaphoreGive(xGlobalProtocolBuffer_A_Key);
 			}
-			else {
-				ucBuffer_A_Position++;
-				ucValidData = pdFALSE;
-			}
-			
 		}
 		else if ( ucActiveBuffer == ACTIVEBUFFER_B ) {
-			// Todo take mutex
-			if( ucGlobalProtocolBuffer_B[ ucBuffer_B_Position ] != 0) {
-				xSLDP_Paket.sldp_size = ucGlobalProtocolBuffer_B[ ucBuffer_B_Position ];
-				ucValidData = pdTRUE;
-			}
-			else {
-				ucBuffer_B_Position++;
-				ucValidData = pdFALSE;
+			if( xSemaphoreTake( xGlobalProtocolBuffer_B_Key, ( 50 / portTICK_RATE_MS ) ) ) {
+				if( ucGlobalProtocolBuffer_B[ ucBuffer_B_Position ] != 0) {
+					xSLDP_Paket.sldp_size = ucGlobalProtocolBuffer_B[ ucBuffer_B_Position ];
+					ucValidData = pdTRUE;
+				}
+				else {
+					ucBuffer_B_Position++;
+					ucValidData = pdFALSE;
+				}
+				xSemaphoreGive(xGlobalProtocolBuffer_A_Key);
 			}
 		}
 
@@ -126,27 +128,27 @@ void vProtocolHandlerTask( void *pvParameters ) {
 				
 /* Bufferhandler */
 				if ( ucBuffer_A_Position >= ( PROTOCOL_BUFFER_SIZE ) ) {
-					ucActiveBuffer = ACTIVEBUFFER_B;
 					ucBuffer_A_Position = 0;
+					xSemaphoreGive(xGlobalProtocolBuffer_A_Key);
+					ucActiveBuffer = ACTIVEBUFFER_B;
+					xSemaphoreTake( xGlobalProtocolBuffer_B_Key, portMAX_DELAY );
 				}
 				
 				if ( ucBuffer_B_Position >= ( PROTOCOL_BUFFER_SIZE ) ) {
-					ucActiveBuffer = ACTIVEBUFFER_A;
 					ucBuffer_B_Position = 0;
+					xSemaphoreGive(xGlobalProtocolBuffer_B_Key);
+					ucActiveBuffer = ACTIVEBUFFER_A;
+					xSemaphoreTake( xGlobalProtocolBuffer_B_Key, portMAX_DELAY );
 				}
 				
 /* write from Doublebuffer into Protocolbuffer */
 				if ( ucActiveBuffer == ACTIVEBUFFER_A ) {
-					xEventGroupWaitBits( xProtocolBufferStatus, BUFFER_A_FreeToUse, pdTRUE, pdFALSE, portMAX_DELAY );					// wait for Buffer A
 					ucBufferSLDPpayloadInput[ ucBufferSLDPpayloadInputCounter ] = ucGlobalProtocolBuffer_A[ ucBuffer_A_Position ];		
 					ucBuffer_A_Position++;
-					xEventGroupSetBits( xProtocolBufferStatus, BUFFER_A_FreeToUse );													// Buffer A release
 				}
 				else if ( ucActiveBuffer == ACTIVEBUFFER_B ) {
-					xEventGroupWaitBits( xProtocolBufferStatus, BUFFER_B_FreeToUse, pdTRUE, pdFALSE, portMAX_DELAY );					// wait for Buffer A
 					ucBufferSLDPpayloadInput[ ucBufferSLDPpayloadInputCounter ] = ucGlobalProtocolBuffer_B[ ucBuffer_B_Position ];
 					ucBuffer_B_Position++;
-					xEventGroupSetBits( xProtocolBufferStatus, BUFFER_B_FreeToUse );													// Buffer A release
 				}
 
 			}

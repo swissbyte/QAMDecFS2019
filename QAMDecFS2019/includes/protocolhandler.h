@@ -23,7 +23,7 @@ struct SLDP_t_class
 	uint8_t sldp_crc8;
 };
 
-void vProtocolHandlerTask(void *pvParameters);
+void vProtocolHandlerTask( void *pvParameters );
 
 
 

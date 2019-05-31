@@ -47,14 +47,14 @@ EventGroupHandle_t xProtocolBufferStatus;					// Eventbits for Buffer-Status
 
 xQueueHandle xALDPQueue;									// Queue from Protocolhandler to Main-Task
 
-/* global Variables */
+/* global Variables 
 uint8_t ucGlobalProtocolBuffer_A[ PROTOCOL_BUFFER_SIZE ] = {};	// Buffer_A from Demodulator to ProtocolTask
 uint8_t ucGlobalProtocolBuffer_B[ PROTOCOL_BUFFER_SIZE ] = {};	// Buffer_B from Demodulator to ProtocolTask
-
-/* Debug ( Testpattern )
-uint8_t ucGlobalProtocolBuffer_A[ PROTOCOL_BUFFER_SIZE ] = {8,1,6,3,4,5,6,7,8,66,8,1,6,1,2,3,4,5,6,66,8,0,6,6,7,8,9,10,11,66,8,1};	// Buffer_A from Demodulator to ProtocolTask
-uint8_t ucGlobalProtocolBuffer_B[ PROTOCOL_BUFFER_SIZE ] = {6,3,4,5,6,7,8,66,8,1,6,3,4,5,6,7,8,66,8,1,6,3,4,5,6,7,8,66,2,1,0,66};	// Buffer_B from Demodulator to ProtocolTask
 */
+/* Debug ( Testpattern ) */
+uint8_t ucGlobalProtocolBuffer_A[ PROTOCOL_BUFFER_SIZE ] = {0,1,6,3,4,5,6,7,8,66,8,1,6,1,2,3,4,5,6,66,8,0,6,6,7,8,9,10,11,66,8,1};	// Buffer_A from Demodulator to ProtocolTask
+uint8_t ucGlobalProtocolBuffer_B[ PROTOCOL_BUFFER_SIZE ] = {6,3,4,5,6,7,8,66,8,1,6,3,4,5,6,7,8,66,8,1,6,3,4,5,6,7,8,66,2,1,0,66};	// Buffer_B from Demodulator to ProtocolTask
+
 
 void vProtocolHandlerTask( void *pvParameters ) {
 	( void ) pvParameters;
@@ -73,75 +73,105 @@ void vProtocolHandlerTask( void *pvParameters ) {
 	
 	uint8_t ucBufferSLDPpayloadInput[ SLDP_PAYLOAD_MAX_SIZE ]= {};		// not ideal, but no better solution found
 	uint8_t ucBufferSLDPpayloadInputCounter;
-	
+	uint8_t ucValidData = pdFALSE;
 	xALDPQueue = xQueueCreate( ANZ_SEND_QUEUE, sizeof( uint8_t ) );
 
 	
-/* Debugging
+/* Debugging */
 	PORTF.DIRSET = PIN0_bm; //LED1
 	PORTF.OUT = 0x01;
 	xEventGroupSetBits( xProtocolBufferStatus, BUFFER_A_FreeToUse );
 	xEventGroupSetBits( xProtocolBufferStatus, BUFFER_B_FreeToUse );
-*/	
+
 	
 	
 
 	for( ;; ) {
-		
+/* Debugging		
 		PORTF.OUTTGL = 0x01;
-		
-		xSLDP_Paket.sldp_size = ucGlobalProtocolBuffer_A[ ucBuffer_A_Position ];
-			
-		for ( ucBufferSLDPpayloadInputCounter = 0; ucBufferSLDPpayloadInputCounter <= ( xSLDP_Paket.sldp_size+1 ); ucBufferSLDPpayloadInputCounter++ ) {
-				
-/* Bufferhandler */
-			if ( ucBuffer_A_Position >= ( PROTOCOL_BUFFER_SIZE ) ) {
-				ucActiveBuffer = ACTIVEBUFFER_B;
-				ucBuffer_A_Position = 0;
-			}
-				
-			if ( ucBuffer_B_Position >= ( PROTOCOL_BUFFER_SIZE ) ) {
-				ucActiveBuffer = ACTIVEBUFFER_A;
-				ucBuffer_B_Position = 0;
-			}
-				
-/* write from Doublebuffer into Protocolbuffer */
-			if ( ucActiveBuffer == ACTIVEBUFFER_A ) {
-				xEventGroupWaitBits( xProtocolBufferStatus, BUFFER_A_FreeToUse, pdTRUE, pdFALSE, portMAX_DELAY );					// wait for Buffer A
-				ucBufferSLDPpayloadInput[ ucBufferSLDPpayloadInputCounter ] = ucGlobalProtocolBuffer_A[ ucBuffer_A_Position ];		
-				ucBuffer_A_Position++;
-				xEventGroupSetBits( xProtocolBufferStatus, BUFFER_A_FreeToUse );													// Buffer A release
-			}
-			else if ( ucActiveBuffer == ACTIVEBUFFER_B ) {
-				xEventGroupWaitBits( xProtocolBufferStatus, BUFFER_B_FreeToUse, pdTRUE, pdFALSE, portMAX_DELAY );					// wait for Buffer A
-				ucBufferSLDPpayloadInput[ ucBufferSLDPpayloadInputCounter ] = ucGlobalProtocolBuffer_B[ ucBuffer_B_Position ];
-				ucBuffer_B_Position++;
-				xEventGroupSetBits( xProtocolBufferStatus, BUFFER_B_FreeToUse );													// Buffer A release
-			}
+*/
 
+
+/* Searching active buffer for SLDPsize not 0 (zero) */		
+		if( ucActiveBuffer == ACTIVEBUFFER_A ) {
+			// Todo take mutex
+			if( ucGlobalProtocolBuffer_A[ ucBuffer_A_Position ] != 0) {
+				xSLDP_Paket.sldp_size = ucGlobalProtocolBuffer_A[ ucBuffer_A_Position ];
+				ucValidData = pdTRUE;
+			}
+			else {
+				ucBuffer_A_Position++;
+				ucValidData = pdFALSE;
+			}
+			
+		}
+		else if ( ucActiveBuffer == ACTIVEBUFFER_B ) {
+			// Todo take mutex
+			if( ucGlobalProtocolBuffer_B[ ucBuffer_B_Position ] != 0) {
+				xSLDP_Paket.sldp_size = ucGlobalProtocolBuffer_B[ ucBuffer_B_Position ];
+				ucValidData = pdTRUE;
+			}
+			else {
+				ucBuffer_B_Position++;
+				ucValidData = pdFALSE;
+			}
 		}
 
-		ucBufferSLDPpayloadInputCounter--;	
+/* Valid Data in buffer? */
+		if( ucValidData == pdTRUE) {
+		
+/* Copy Data from global Buffer into local Buffer */
+
+			for ( ucBufferSLDPpayloadInputCounter = 0; ucBufferSLDPpayloadInputCounter <= ( xSLDP_Paket.sldp_size+1 ); ucBufferSLDPpayloadInputCounter++ ) {
+				
+/* Bufferhandler */
+				if ( ucBuffer_A_Position >= ( PROTOCOL_BUFFER_SIZE ) ) {
+					ucActiveBuffer = ACTIVEBUFFER_B;
+					ucBuffer_A_Position = 0;
+				}
+				
+				if ( ucBuffer_B_Position >= ( PROTOCOL_BUFFER_SIZE ) ) {
+					ucActiveBuffer = ACTIVEBUFFER_A;
+					ucBuffer_B_Position = 0;
+				}
+				
+/* write from Doublebuffer into Protocolbuffer */
+				if ( ucActiveBuffer == ACTIVEBUFFER_A ) {
+					xEventGroupWaitBits( xProtocolBufferStatus, BUFFER_A_FreeToUse, pdTRUE, pdFALSE, portMAX_DELAY );					// wait for Buffer A
+					ucBufferSLDPpayloadInput[ ucBufferSLDPpayloadInputCounter ] = ucGlobalProtocolBuffer_A[ ucBuffer_A_Position ];		
+					ucBuffer_A_Position++;
+					xEventGroupSetBits( xProtocolBufferStatus, BUFFER_A_FreeToUse );													// Buffer A release
+				}
+				else if ( ucActiveBuffer == ACTIVEBUFFER_B ) {
+					xEventGroupWaitBits( xProtocolBufferStatus, BUFFER_B_FreeToUse, pdTRUE, pdFALSE, portMAX_DELAY );					// wait for Buffer A
+					ucBufferSLDPpayloadInput[ ucBufferSLDPpayloadInputCounter ] = ucGlobalProtocolBuffer_B[ ucBuffer_B_Position ];
+					ucBuffer_B_Position++;
+					xEventGroupSetBits( xProtocolBufferStatus, BUFFER_B_FreeToUse );													// Buffer A release
+				}
+
+			}
+
+			ucBufferSLDPpayloadInputCounter--;	
 			
 /* fill SLDP and ALDP */
-		xSLDP_Paket.sldp_crc8 = ucBufferSLDPpayloadInput[ ucBufferSLDPpayloadInputCounter ];									// TODO: CRC8 überprüfen
-		xSLDP_Paket.sldp_payload = &ucBufferSLDPpayloadInput[ 1 ];
+			xSLDP_Paket.sldp_crc8 = ucBufferSLDPpayloadInput[ ucBufferSLDPpayloadInputCounter ];									// TODO: CRC8 überprüfen
+			xSLDP_Paket.sldp_payload = &ucBufferSLDPpayloadInput[ 1 ];
 			
-		xALDP_Paket = ( struct ALDP_t_class * )xSLDP_Paket.sldp_payload;
+			xALDP_Paket = ( struct ALDP_t_class * )xSLDP_Paket.sldp_payload;
 			
 		
 /* Debug
-		uint8_t array[ 256 ]={};
-		memcpy( array, xALDP_Paket->aldp_payload, xALDP_Paket->aldp_hdr_byte_2 );
+			uint8_t array[ 256 ]={};
+			memcpy( array, xALDP_Paket->aldp_payload, xALDP_Paket->aldp_hdr_byte_2 );
 */
 
 /* write ALDP Payload into ALDP-Queue */
-		for ( uint8_t i=0; i < xALDP_Paket->aldp_hdr_byte_2; i++ ) {
-			uint8_t ucSendChar = xSLDP_Paket.sldp_payload[ i+2 ];
-			xQueueSend( xALDPQueue, &ucSendChar, portMAX_DELAY );
+			for ( uint8_t i=0; i < xALDP_Paket->aldp_hdr_byte_2; i++ ) {
+				uint8_t ucSendChar = xSLDP_Paket.sldp_payload[ i+2 ];
+				xQueueSend( xALDPQueue, &ucSendChar, portMAX_DELAY );
+			}
+
 		}
 
-
-		vTaskDelay( 200 / portTICK_RATE_MS );				// Delay 200ms
 	}
 }

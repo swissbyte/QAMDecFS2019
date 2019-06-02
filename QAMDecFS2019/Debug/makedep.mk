@@ -38,5 +38,7 @@ mem_check.c
 
 NHD0420Driver.c
 
+protocolhandler.c
+
 utils.c
 

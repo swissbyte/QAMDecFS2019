@@ -9,9 +9,11 @@
 
 #include "read_peaks.h"
 #include "errorHandler.h"
+#include "dma_config.h"
 
 #define peak_array_length 2
 
+uint8_t buffer_length;
 
 
 void vRead_Peaks(void *pvParameters)

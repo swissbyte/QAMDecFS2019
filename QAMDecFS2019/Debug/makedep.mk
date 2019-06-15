@@ -46,11 +46,7 @@ Menu_IMU.c
 
 NHD0420Driver.c
 
-phase_detection.c
-
 protocolhandler.c
-
-read_peaks.c
 
 utils.c
 

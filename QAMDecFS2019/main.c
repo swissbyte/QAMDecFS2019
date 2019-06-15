@@ -41,6 +41,9 @@ extern void vApplicationIdleHook( void );
 
 TaskHandle_t ProtocolHandlerTask;
 
+
+
+
 void vApplicationIdleHook( void )
 {	
 	
@@ -54,13 +57,13 @@ int main(void)
 	vInitDisplay();
 	vInitDMA();	
 	
-	//xTaskCreate( vProtocolHandlerTask, (const char *) "ProtocolHandlerTask", configMINIMAL_STACK_SIZE+1000, NULL, 1, NULL);
+	xTaskCreate( vProtocolHandlerTask, (const char *) "ProtocolHandlerTask", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
 	//xTaskCreate( vMenu, (const char *) "Menu", configMINIMAL_STACK_SIZE, NULL, 1, &xMenu);
 	//xTaskCreate( vOutput, (const char *) "IMU", configMINIMAL_STACK_SIZE, NULL, 1, &xIO);
 	//xTaskCreate( vTestpattern, (const char *) "IMU", configMINIMAL_STACK_SIZE, NULL, 1, &xTestpattern);
-	xTaskCreate( vRead_Peaks, (const char *) "read_Peaks", configMINIMAL_STACK_SIZE+100, NULL, 1, NULL);
-	xTaskCreate( vPhase_Detection, (const char *) "phase_detect", configMINIMAL_STACK_SIZE+10, NULL, 1, NULL);
-	xTaskCreate( vTask_DMAHandler, (const char *) "dmaHandler", configMINIMAL_STACK_SIZE + 100, NULL, 1, NULL);		
+	//xTaskCreate( vRead_Peaks, (const char *) "read_Peaks", configMINIMAL_STACK_SIZE+100, NULL, 1, NULL);
+	//xTaskCreate( vPhase_Detection, (const char *) "phase_detect", configMINIMAL_STACK_SIZE+10, NULL, 1, NULL);
+	xTaskCreate( vTask_DMAHandler, (const char *) "dmaHandler", configMINIMAL_STACK_SIZE, NULL, 1, NULL);		
 	xSignalProcessEventGroup = xEventGroupCreate();
 	xPhaseDetectionEventGroup = xEventGroupCreate();
 	xDMAProcessEventGroup = xEventGroupCreate();
@@ -76,8 +79,8 @@ int main(void)
 	vDisplayClear();
 	vDisplayWriteStringAtPos(0,0,"FreeRTOS 10.0.1");
 	vDisplayWriteStringAtPos(1,0,"EDUBoard 1.0");
-	vDisplayWriteStringAtPos(2,0,"Template");
-	vDisplayWriteStringAtPos(3,0,"ResetReason: %d", reason);
+	vDisplayWriteStringAtPos(2,0,"Template2");
+	vDisplayWriteStringAtPos(3,0,"ResetReaso45n: %d", reason);
 	vTaskStartScheduler();
 	return 0;
 }

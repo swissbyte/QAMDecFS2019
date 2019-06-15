@@ -29,6 +29,8 @@
 
 #define	PROTOCOL_BUFFER_SIZE		32
 
+EventGroupHandle_t xSignalProcessEventGroup;
+
 uint8_t ucGlobalProtocolBuffer_A[ PROTOCOL_BUFFER_SIZE ] = {}; // Buffer_A from Demodulator to ProtocolTask
 uint8_t ucGlobalProtocolBuffer_B[ PROTOCOL_BUFFER_SIZE ] = {}; // Buffer_B from Demodulator to ProtocolTask
 

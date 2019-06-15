@@ -13,12 +13,15 @@
 #include "protocolhandler.h"
 #include "string.h"
 #include "semphr.h"
+#include "dma_config.h"
+#include "double_buffer_read_out.h"
+
+
 
 
 void vProtocolHandlerTask( void *pvParameters )
 {
-	
-	
+
 	while(1)
 	{
 		

@@ -41,6 +41,9 @@ SUBDIRS :=  \
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS +=  \
+../ButtonHandler.c \
+../dma_config.c \
+../double_buffer_read_out.c \
 ../driver/clksys_driver.c \
 ../driver/pmic_driver.c \
 ../driver/port_driver.c \
@@ -58,8 +61,11 @@ C_SRCS +=  \
 ../init.c \
 ../main.c \
 ../mem_check.c \
+../Menu_IMU.c \
 ../NHD0420Driver.c \
+../phase_detection.c \
 ../protocolhandler.c \
+../read_peaks.c \
 ../utils.c
 
 
@@ -70,6 +76,9 @@ ASM_SRCS +=
 
 
 OBJS +=  \
+ButtonHandler.o \
+dma_config.o \
+double_buffer_read_out.o \
 driver/clksys_driver.o \
 driver/pmic_driver.o \
 driver/port_driver.o \
@@ -87,11 +96,17 @@ FreeRTOS/timers.o \
 init.o \
 main.o \
 mem_check.o \
+Menu_IMU.o \
 NHD0420Driver.o \
+phase_detection.o \
 protocolhandler.o \
+read_peaks.o \
 utils.o
 
 OBJS_AS_ARGS +=  \
+ButtonHandler.o \
+dma_config.o \
+double_buffer_read_out.o \
 driver/clksys_driver.o \
 driver/pmic_driver.o \
 driver/port_driver.o \
@@ -109,11 +124,17 @@ FreeRTOS/timers.o \
 init.o \
 main.o \
 mem_check.o \
+Menu_IMU.o \
 NHD0420Driver.o \
+phase_detection.o \
 protocolhandler.o \
+read_peaks.o \
 utils.o
 
 C_DEPS +=  \
+ButtonHandler.d \
+dma_config.d \
+double_buffer_read_out.d \
 driver/clksys_driver.d \
 driver/pmic_driver.d \
 driver/port_driver.d \
@@ -131,11 +152,17 @@ FreeRTOS/timers.d \
 init.d \
 main.d \
 mem_check.d \
+Menu_IMU.d \
 NHD0420Driver.d \
+phase_detection.d \
 protocolhandler.d \
+read_peaks.d \
 utils.d
 
 C_DEPS_AS_ARGS +=  \
+ButtonHandler.d \
+dma_config.d \
+double_buffer_read_out.d \
 driver/clksys_driver.d \
 driver/pmic_driver.d \
 driver/port_driver.d \
@@ -153,8 +180,11 @@ FreeRTOS/timers.d \
 init.d \
 main.d \
 mem_check.d \
+Menu_IMU.d \
 NHD0420Driver.d \
+phase_detection.d \
 protocolhandler.d \
+read_peaks.d \
 utils.d
 
 OUTPUT_FILE_PATH +=QAMDecFS2019.elf
@@ -171,146 +201,79 @@ LINKER_SCRIPT_DEP+=
 
 
 # AVR32/GNU C Compiler
-driver/clksys_driver.o: ../driver/clksys_driver.c
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+./%.o: .././%.c
 	@echo Building file: $<
 	@echo Invoking: AVR/GNU C Compiler : 5.4.0
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG -DF_CPU=32000000UL -DDEBUG  -I"../includes" -I"../driver" -I"../FreeRTOS/include" -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\include"  -O0 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g3 -Wall -mmcu=atxmega128a3u -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\gcc\dev\atxmega128a3u" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG -DF_CPU=32000000UL -DDEBUG  -I"../includes" -I"../driver" -I"../FreeRTOS/include" -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\include"  -O0 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g3 -Wall -mmcu=atxmega128a3u -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\gcc\dev\atxmega128a3u" -c -std=gnu99 -mcall-prologues -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
 	@echo Finished building: $<
 	
 
-driver/pmic_driver.o: ../driver/pmic_driver.c
+driver/%.o: ../driver/%.c
 	@echo Building file: $<
 	@echo Invoking: AVR/GNU C Compiler : 5.4.0
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG -DF_CPU=32000000UL -DDEBUG  -I"../includes" -I"../driver" -I"../FreeRTOS/include" -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\include"  -O0 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g3 -Wall -mmcu=atxmega128a3u -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\gcc\dev\atxmega128a3u" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG -DF_CPU=32000000UL -DDEBUG  -I"../includes" -I"../driver" -I"../FreeRTOS/include" -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\include"  -O0 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g3 -Wall -mmcu=atxmega128a3u -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\gcc\dev\atxmega128a3u" -c -std=gnu99 -mcall-prologues -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
 	@echo Finished building: $<
 	
 
-driver/port_driver.o: ../driver/port_driver.c
+FreeRTOS/%.o: ../FreeRTOS/%.c
 	@echo Building file: $<
 	@echo Invoking: AVR/GNU C Compiler : 5.4.0
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG -DF_CPU=32000000UL -DDEBUG  -I"../includes" -I"../driver" -I"../FreeRTOS/include" -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\include"  -O0 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g3 -Wall -mmcu=atxmega128a3u -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\gcc\dev\atxmega128a3u" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG -DF_CPU=32000000UL -DDEBUG  -I"../includes" -I"../driver" -I"../FreeRTOS/include" -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\include"  -O0 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g3 -Wall -mmcu=atxmega128a3u -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\gcc\dev\atxmega128a3u" -c -std=gnu99 -mcall-prologues -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
 	@echo Finished building: $<
 	
-
-driver/TC_driver.o: ../driver/TC_driver.c
-	@echo Building file: $<
-	@echo Invoking: AVR/GNU C Compiler : 5.4.0
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG -DF_CPU=32000000UL -DDEBUG  -I"../includes" -I"../driver" -I"../FreeRTOS/include" -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\include"  -O0 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g3 -Wall -mmcu=atxmega128a3u -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\gcc\dev\atxmega128a3u" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
-	@echo Finished building: $<
-	
-
-./errorHandler.o: .././errorHandler.c
-	@echo Building file: $<
-	@echo Invoking: AVR/GNU C Compiler : 5.4.0
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG -DF_CPU=32000000UL -DDEBUG  -I"../includes" -I"../driver" -I"../FreeRTOS/include" -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\include"  -O0 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g3 -Wall -mmcu=atxmega128a3u -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\gcc\dev\atxmega128a3u" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
-	@echo Finished building: $<
-	
-
-FreeRTOS/croutine.o: ../FreeRTOS/croutine.c
-	@echo Building file: $<
-	@echo Invoking: AVR/GNU C Compiler : 5.4.0
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG -DF_CPU=32000000UL -DDEBUG  -I"../includes" -I"../driver" -I"../FreeRTOS/include" -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\include"  -O0 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g3 -Wall -mmcu=atxmega128a3u -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\gcc\dev\atxmega128a3u" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
-	@echo Finished building: $<
-	
-
-FreeRTOS/event_groups.o: ../FreeRTOS/event_groups.c
-	@echo Building file: $<
-	@echo Invoking: AVR/GNU C Compiler : 5.4.0
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG -DF_CPU=32000000UL -DDEBUG  -I"../includes" -I"../driver" -I"../FreeRTOS/include" -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\include"  -O0 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g3 -Wall -mmcu=atxmega128a3u -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\gcc\dev\atxmega128a3u" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
-	@echo Finished building: $<
-	
-
-FreeRTOS/heap_1.o: ../FreeRTOS/heap_1.c
-	@echo Building file: $<
-	@echo Invoking: AVR/GNU C Compiler : 5.4.0
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG -DF_CPU=32000000UL -DDEBUG  -I"../includes" -I"../driver" -I"../FreeRTOS/include" -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\include"  -O0 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g3 -Wall -mmcu=atxmega128a3u -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\gcc\dev\atxmega128a3u" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
-	@echo Finished building: $<
-	
-
-FreeRTOS/list.o: ../FreeRTOS/list.c
-	@echo Building file: $<
-	@echo Invoking: AVR/GNU C Compiler : 5.4.0
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG -DF_CPU=32000000UL -DDEBUG  -I"../includes" -I"../driver" -I"../FreeRTOS/include" -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\include"  -O0 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g3 -Wall -mmcu=atxmega128a3u -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\gcc\dev\atxmega128a3u" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
-	@echo Finished building: $<
-	
-
-FreeRTOS/port.o: ../FreeRTOS/port.c
-	@echo Building file: $<
-	@echo Invoking: AVR/GNU C Compiler : 5.4.0
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG -DF_CPU=32000000UL -DDEBUG  -I"../includes" -I"../driver" -I"../FreeRTOS/include" -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\include"  -O0 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g3 -Wall -mmcu=atxmega128a3u -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\gcc\dev\atxmega128a3u" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
-	@echo Finished building: $<
-	
-
-FreeRTOS/queue.o: ../FreeRTOS/queue.c
-	@echo Building file: $<
-	@echo Invoking: AVR/GNU C Compiler : 5.4.0
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG -DF_CPU=32000000UL -DDEBUG  -I"../includes" -I"../driver" -I"../FreeRTOS/include" -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\include"  -O0 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g3 -Wall -mmcu=atxmega128a3u -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\gcc\dev\atxmega128a3u" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
-	@echo Finished building: $<
-	
-
-FreeRTOS/stream_buffer.o: ../FreeRTOS/stream_buffer.c
-	@echo Building file: $<
-	@echo Invoking: AVR/GNU C Compiler : 5.4.0
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG -DF_CPU=32000000UL -DDEBUG  -I"../includes" -I"../driver" -I"../FreeRTOS/include" -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\include"  -O0 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g3 -Wall -mmcu=atxmega128a3u -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\gcc\dev\atxmega128a3u" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
-	@echo Finished building: $<
-	
-
-FreeRTOS/tasks.o: ../FreeRTOS/tasks.c
-	@echo Building file: $<
-	@echo Invoking: AVR/GNU C Compiler : 5.4.0
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG -DF_CPU=32000000UL -DDEBUG  -I"../includes" -I"../driver" -I"../FreeRTOS/include" -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\include"  -O0 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g3 -Wall -mmcu=atxmega128a3u -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\gcc\dev\atxmega128a3u" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
-	@echo Finished building: $<
-	
-
-FreeRTOS/timers.o: ../FreeRTOS/timers.c
-	@echo Building file: $<
-	@echo Invoking: AVR/GNU C Compiler : 5.4.0
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG -DF_CPU=32000000UL -DDEBUG  -I"../includes" -I"../driver" -I"../FreeRTOS/include" -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\include"  -O0 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g3 -Wall -mmcu=atxmega128a3u -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\gcc\dev\atxmega128a3u" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
-	@echo Finished building: $<
-	
-
-./init.o: .././init.c
-	@echo Building file: $<
-	@echo Invoking: AVR/GNU C Compiler : 5.4.0
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG -DF_CPU=32000000UL -DDEBUG  -I"../includes" -I"../driver" -I"../FreeRTOS/include" -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\include"  -O0 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g3 -Wall -mmcu=atxmega128a3u -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\gcc\dev\atxmega128a3u" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
-	@echo Finished building: $<
-	
-
-./main.o: .././main.c
-	@echo Building file: $<
-	@echo Invoking: AVR/GNU C Compiler : 5.4.0
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG -DF_CPU=32000000UL -DDEBUG  -I"../includes" -I"../driver" -I"../FreeRTOS/include" -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\include"  -O0 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g3 -Wall -mmcu=atxmega128a3u -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\gcc\dev\atxmega128a3u" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
-	@echo Finished building: $<
-	
-
-./mem_check.o: .././mem_check.c
-	@echo Building file: $<
-	@echo Invoking: AVR/GNU C Compiler : 5.4.0
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG -DF_CPU=32000000UL -DDEBUG  -I"../includes" -I"../driver" -I"../FreeRTOS/include" -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\include"  -O0 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g3 -Wall -mmcu=atxmega128a3u -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\gcc\dev\atxmega128a3u" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
-	@echo Finished building: $<
-	
-
-./NHD0420Driver.o: .././NHD0420Driver.c
-	@echo Building file: $<
-	@echo Invoking: AVR/GNU C Compiler : 5.4.0
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG -DF_CPU=32000000UL -DDEBUG  -I"../includes" -I"../driver" -I"../FreeRTOS/include" -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\include"  -O0 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g3 -Wall -mmcu=atxmega128a3u -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\gcc\dev\atxmega128a3u" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
-	@echo Finished building: $<
-	
-
-./protocolhandler.o: .././protocolhandler.c
-	@echo Building file: $<
-	@echo Invoking: AVR/GNU C Compiler : 5.4.0
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG -DF_CPU=32000000UL -DDEBUG  -I"../includes" -I"../driver" -I"../FreeRTOS/include" -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\include"  -O0 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g3 -Wall -mmcu=atxmega128a3u -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\gcc\dev\atxmega128a3u" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
-	@echo Finished building: $<
-	
-
-./utils.o: .././utils.c
-	@echo Building file: $<
-	@echo Invoking: AVR/GNU C Compiler : 5.4.0
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG -DF_CPU=32000000UL -DDEBUG  -I"../includes" -I"../driver" -I"../FreeRTOS/include" -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\include"  -O0 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g3 -Wall -mmcu=atxmega128a3u -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\XMEGAA_DFP\1.1.68\gcc\dev\atxmega128a3u" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
-	@echo Finished building: $<
-	
-
 
 
 

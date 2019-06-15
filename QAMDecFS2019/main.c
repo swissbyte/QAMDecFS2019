@@ -30,6 +30,11 @@
 #include "protocolhandler.h"
 #include "Menu_IMU.h"
 
+#include "dma_config.h"		
+#include "double_buffer_read_out.h"
+#include "read_peaks.h"
+#include "phase_detection.h"
+
 
 extern void vApplicationIdleHook( void );
 
@@ -47,12 +52,21 @@ int main(void)
 
 	vInitClock();
 	vInitDisplay();
+	vInitDMA();	
 	
-	xTaskCreate( vProtocolHandlerTask, (const char *) "ProtocolHandlerTask", configMINIMAL_STACK_SIZE+1000, NULL, 1, NULL);
-	xTaskCreate( vMenu, (const char *) "Menu", configMINIMAL_STACK_SIZE, NULL, 1, &xMenu);
-	xTaskCreate( vOutput, (const char *) "IMU", configMINIMAL_STACK_SIZE, NULL, 1, &xIO);
-	xTaskCreate( vTestpattern, (const char *) "IMU", configMINIMAL_STACK_SIZE, NULL, 1, &xTestpattern);
+	//xTaskCreate( vProtocolHandlerTask, (const char *) "ProtocolHandlerTask", configMINIMAL_STACK_SIZE+1000, NULL, 1, NULL);
+	//xTaskCreate( vMenu, (const char *) "Menu", configMINIMAL_STACK_SIZE, NULL, 1, &xMenu);
+	//xTaskCreate( vOutput, (const char *) "IMU", configMINIMAL_STACK_SIZE, NULL, 1, &xIO);
+	//xTaskCreate( vTestpattern, (const char *) "IMU", configMINIMAL_STACK_SIZE, NULL, 1, &xTestpattern);
+	xTaskCreate( vRead_Peaks, (const char *) "read_Peaks", configMINIMAL_STACK_SIZE+100, NULL, 1, NULL);
+	xTaskCreate( vPhase_Detection, (const char *) "phase_detect", configMINIMAL_STACK_SIZE+10, NULL, 1, NULL);
+	xTaskCreate( vTask_DMAHandler, (const char *) "dmaHandler", configMINIMAL_STACK_SIZE + 100, NULL, 1, NULL);		
+	xSignalProcessEventGroup = xEventGroupCreate();
+	xPhaseDetectionEventGroup = xEventGroupCreate();
+	xDMAProcessEventGroup = xEventGroupCreate();
 	
+	PORTF.DIRSET = PIN0_bm; /*LED1*/
+	PORTE.DIRSET = PIN1_bm; /*LED1*/	
 		
 	xData = xQueueCreate( 10, sizeof(uint8_t) );
 		

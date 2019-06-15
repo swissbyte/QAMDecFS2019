@@ -39,7 +39,7 @@
       </framework-data>
     </AsfFrameworkConfig>
     <avrtool>com.atmel.avrdbg.tool.edbg</avrtool>
-    <avrtoolserialnumber>ATMLEDBGC04201100001</avrtoolserialnumber>
+    <avrtoolserialnumber>ATMLEDBGC04201100016</avrtoolserialnumber>
     <avrdeviceexpectedsignature>0x1E9742</avrdeviceexpectedsignature>
     <avrtoolinterface>JTAG</avrtoolinterface>
     <com_atmel_avrdbg_tool_edbg>
@@ -52,15 +52,14 @@
           <JtagDevicesAfter>0</JtagDevicesAfter>
           <JtagInstrBitsBefore>0</JtagInstrBitsBefore>
           <JtagInstrBitsAfter>0</JtagInstrBitsAfter>
-          <JtagSelectedDeviceIndexInChain>
-          </JtagSelectedDeviceIndexInChain>
+          <JtagSelectedDeviceIndexInChain>0</JtagSelectedDeviceIndexInChain>
           <JtagDaisyChainDevices>
           </JtagDaisyChainDevices>
         </InterfaceProperties>
         <InterfaceName>JTAG</InterfaceName>
       </ToolOptions>
       <ToolType>com.atmel.avrdbg.tool.edbg</ToolType>
-      <ToolNumber>ATMLEDBGC04201100001</ToolNumber>
+      <ToolNumber>ATMLEDBGC04201100016</ToolNumber>
       <ToolName>EDBG</ToolName>
     </com_atmel_avrdbg_tool_edbg>
     <avrtoolinterfaceclock>4000000</avrtoolinterfaceclock>
@@ -109,49 +108,56 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <ToolchainSettings>
       <AvrGcc>
-        <avrgcc.common.Device>-mmcu=atxmega128a3u -B "%24(PackRepoDir)\Atmel\XMEGAA_DFP\1.1.68\gcc\dev\atxmega128a3u"</avrgcc.common.Device>
-        <avrgcc.common.outputfiles.hex>False</avrgcc.common.outputfiles.hex>
-        <avrgcc.common.outputfiles.lss>False</avrgcc.common.outputfiles.lss>
-        <avrgcc.common.outputfiles.eep>False</avrgcc.common.outputfiles.eep>
-        <avrgcc.common.outputfiles.srec>False</avrgcc.common.outputfiles.srec>
-        <avrgcc.common.outputfiles.usersignatures>False</avrgcc.common.outputfiles.usersignatures>
-        <avrgcc.compiler.general.ChangeDefaultCharTypeUnsigned>True</avrgcc.compiler.general.ChangeDefaultCharTypeUnsigned>
-        <avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>True</avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>
-        <avrgcc.compiler.symbols.DefSymbols>
-          <ListValues>
-            <Value>DEBUG</Value>
-            <Value>F_CPU=32000000UL</Value>
-            <Value>DEBUG</Value>
-          </ListValues>
-        </avrgcc.compiler.symbols.DefSymbols>
-        <avrgcc.compiler.directories.IncludePaths>
-          <ListValues>
-            <Value>../includes</Value>
-            <Value>../driver</Value>
-            <Value>../FreeRTOS/include</Value>
-            <Value>%24(PackRepoDir)\Atmel\XMEGAA_DFP\1.1.68\include</Value>
-          </ListValues>
-        </avrgcc.compiler.directories.IncludePaths>
-        <avrgcc.compiler.optimization.PackStructureMembers>True</avrgcc.compiler.optimization.PackStructureMembers>
-        <avrgcc.compiler.optimization.AllocateBytesNeededForEnum>True</avrgcc.compiler.optimization.AllocateBytesNeededForEnum>
-        <avrgcc.compiler.optimization.DebugLevel>Maximum (-g3)</avrgcc.compiler.optimization.DebugLevel>
-        <avrgcc.compiler.warnings.AllWarnings>True</avrgcc.compiler.warnings.AllWarnings>
-        <avrgcc.linker.libraries.Libraries>
-          <ListValues>
-            <Value>libm</Value>
-          </ListValues>
-        </avrgcc.linker.libraries.Libraries>
-        <avrgcc.assembler.general.IncludePaths>
-          <ListValues>
-            <Value>%24(PackRepoDir)\Atmel\XMEGAA_DFP\1.1.68\include</Value>
-          </ListValues>
-        </avrgcc.assembler.general.IncludePaths>
-        <avrgcc.assembler.debugging.DebugLevel>Default (-Wa,-g)</avrgcc.assembler.debugging.DebugLevel>
-      </AvrGcc>
+  <avrgcc.common.Device>-mmcu=atxmega128a3u -B "%24(PackRepoDir)\Atmel\XMEGAA_DFP\1.1.68\gcc\dev\atxmega128a3u"</avrgcc.common.Device>
+  <avrgcc.common.outputfiles.hex>False</avrgcc.common.outputfiles.hex>
+  <avrgcc.common.outputfiles.lss>False</avrgcc.common.outputfiles.lss>
+  <avrgcc.common.outputfiles.eep>False</avrgcc.common.outputfiles.eep>
+  <avrgcc.common.outputfiles.srec>False</avrgcc.common.outputfiles.srec>
+  <avrgcc.common.outputfiles.usersignatures>False</avrgcc.common.outputfiles.usersignatures>
+  <avrgcc.compiler.general.ChangeDefaultCharTypeUnsigned>True</avrgcc.compiler.general.ChangeDefaultCharTypeUnsigned>
+  <avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>True</avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>
+  <avrgcc.compiler.symbols.DefSymbols>
+    <ListValues>
+      <Value>DEBUG</Value>
+      <Value>F_CPU=32000000UL</Value>
+      <Value>DEBUG</Value>
+    </ListValues>
+  </avrgcc.compiler.symbols.DefSymbols>
+  <avrgcc.compiler.directories.IncludePaths>
+    <ListValues>
+      <Value>../includes</Value>
+      <Value>../driver</Value>
+      <Value>../FreeRTOS/include</Value>
+      <Value>%24(PackRepoDir)\Atmel\XMEGAA_DFP\1.1.68\include</Value>
+    </ListValues>
+  </avrgcc.compiler.directories.IncludePaths>
+  <avrgcc.compiler.optimization.PackStructureMembers>True</avrgcc.compiler.optimization.PackStructureMembers>
+  <avrgcc.compiler.optimization.AllocateBytesNeededForEnum>True</avrgcc.compiler.optimization.AllocateBytesNeededForEnum>
+  <avrgcc.compiler.optimization.DebugLevel>Maximum (-g3)</avrgcc.compiler.optimization.DebugLevel>
+  <avrgcc.compiler.warnings.AllWarnings>True</avrgcc.compiler.warnings.AllWarnings>
+  <avrgcc.compiler.miscellaneous.OtherFlags>-std=gnu99 -mcall-prologues</avrgcc.compiler.miscellaneous.OtherFlags>
+  <avrgcc.linker.libraries.Libraries>
+    <ListValues>
+      <Value>libm</Value>
+    </ListValues>
+  </avrgcc.linker.libraries.Libraries>
+  <avrgcc.assembler.general.IncludePaths>
+    <ListValues>
+      <Value>%24(PackRepoDir)\Atmel\XMEGAA_DFP\1.1.68\include</Value>
+    </ListValues>
+  </avrgcc.assembler.general.IncludePaths>
+  <avrgcc.assembler.debugging.DebugLevel>Default (-Wa,-g)</avrgcc.assembler.debugging.DebugLevel>
+</AvrGcc>
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="ButtonHandler.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="dma_config.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="double_buffer_read_out.c">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="driver\clksys_driver.c">
@@ -268,6 +274,12 @@
     <Compile Include="includes\ButtonHandler.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="includes\dma_config.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="includes\double_buffer_read_out.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="includes\errorHandler.h">
       <SubType>compile</SubType>
     </Compile>
@@ -286,7 +298,13 @@
     <Compile Include="includes\NHD0420Driver.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="includes\phase_detection.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="includes\protocolhandler.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="includes\read_peaks.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="includes\utils.h">
@@ -307,7 +325,13 @@
     <Compile Include="NHD0420Driver.c">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="phase_detection.c">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="protocolhandler.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="read_peaks.c">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="utils.c">

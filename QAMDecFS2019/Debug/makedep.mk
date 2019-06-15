@@ -2,6 +2,12 @@
 # Automatically-generated file. Do not edit or delete the file
 ################################################################################
 
+ButtonHandler.c
+
+dma_config.c
+
+double_buffer_read_out.c
+
 driver\clksys_driver.c
 
 driver\pmic_driver.c
@@ -36,9 +42,15 @@ main.c
 
 mem_check.c
 
+Menu_IMU.c
+
 NHD0420Driver.c
 
+phase_detection.c
+
 protocolhandler.c
+
+read_peaks.c
 
 utils.c
 

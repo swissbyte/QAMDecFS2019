@@ -23,6 +23,8 @@
 volatile uint8_t buffer_a[DMA_BUF_LEN];
 volatile uint8_t buffer_b[DMA_BUF_LEN];
 
+volatile uint8_t targetBuffer = 0;
+
 EventGroupHandle_t xDMAProcessEventGroup;
 
 //Initialisiert den ADC im Freerunning Mode
@@ -32,7 +34,7 @@ void sys_InitADC(void)
 	// Conversion mode: Unsigned, 8Bit
 	ADCB.CTRLB=(ADCB.CTRLB & (~(ADC_CONMODE_bm | ADC_FREERUN_bm | ADC_RESOLUTION_gm))) | ADC_RESOLUTION_8BIT_gc; // | ADC_FREERUN_bm;
 	// Reference 1V and configuration of prescaler to 256
-	ADCB.PRESCALER=(ADCB.PRESCALER & (~ADC_PRESCALER_gm)) | ADC_PRESCALER_DIV32_gc; //clockdivider to 16 or 32, since adc max. is 2MHz
+	ADCB.PRESCALER=(ADCB.PRESCALER & (~ADC_PRESCALER_gm)) | ADC_PRESCALER_DIV16_gc; //clockdivider to 16 or 32, since adc max. is 2MHz
 	ADCB.REFCTRL = ADC_REFSEL_INT1V_gc;			//internal 1V , maybe INTVCC to take for bigger measure range
 
 	// Read and save the ADC offset using channel 0
@@ -53,7 +55,7 @@ void vInitDMA()
 	// set TCC1 to 11024Hz overflow, actually 11019.2838Hz (-0.052% error)
 	TCC1.CTRLA = 0; // stop if running
 	TCC1.CNT = 0;
-	TCC1.PER = 1000-1;
+	TCC1.PER = 125-1;
 		
 	sys_InitADC();
 
@@ -64,15 +66,15 @@ void vInitDMA()
 	DMA.CTRL = DMA_RESET_bm;
 	while ((DMA.CTRL & DMA_RESET_bm) != 0);
 	
-	DMA.CTRL = DMA_CH_ENABLE_bm | DMA_DBUFMODE_CH01_gc; // double buffered with channels 0 and 1
+	DMA.CTRL = DMA_CH_ENABLE_bm;// | DMA_DBUFMODE_CH01_gc; // double buffered with channels 0 and 1
 	
 	//Bei Double Buffering wird automatisch aus Channel 0 und 1 ein "Pair" gebildet. 
 	//Siehe dazu AVR1304.P8
 	
 	// channel 0
 	// **** TODO: reset dma channels
-	DMA.CH0.REPCNT		= 0;
-	DMA.CH0.CTRLA		=  DMA_CH_BURSTLEN_1BYTE_gc | DMA_CH_SINGLE_bm | DMA_CH_REPEAT_bm; // ADC result is 1 byte (8 bit word)
+	DMA.CH0.REPCNT		= 1;
+	DMA.CH0.CTRLA		=  DMA_CH_BURSTLEN_1BYTE_gc | DMA_CH_SINGLE_bm;// | DMA_CH_REPEAT_bm; // ADC result is 1 byte (8 bit word)
 	DMA.CH0.CTRLB		= DMA_CH_TRNINTLVL_LO_gc; // set interrupt when burs length reached
 	DMA.CH0.ADDRCTRL	= DMA_CH_SRCRELOAD_BURST_gc | // reload source after every burst
 	DMA_CH_DESTRELOAD_TRANSACTION_gc | DMA_CH_DESTDIR_INC_gc; // reload destination after every transaction
@@ -85,6 +87,7 @@ void vInitDMA()
 	DMA.CH0.SRCADDR1	= (( (uint16_t) &ADCB.CH0.RES) >> 8) & 0xFF;
 	DMA.CH0.SRCADDR2	= 0;
 
+	/*
 	// channel 1
 	DMA.CH1.REPCNT		= 0;
 	DMA.CH1.CTRLA		= DMA_CH_BURSTLEN_1BYTE_gc | DMA_CH_SINGLE_bm | DMA_CH_REPEAT_bm; // ADC result is 1 byte (8 bit word)
@@ -99,49 +102,41 @@ void vInitDMA()
 	DMA.CH1.SRCADDR0	= (( (uint16_t) &ADCB.CH0.RES) >> 0) & 0xFF;
 	DMA.CH1.SRCADDR1	= (( (uint16_t) &ADCB.CH0.RES) >> 8) & 0xFF;
 	DMA.CH1.SRCADDR2	= 0;
+	*/
 
 	DMA.CH0.CTRLA		|= DMA_CH_ENABLE_bm; //enable DMA channel 0
-	DMA.CH1.CTRLA		|= DMA_CH_ENABLE_bm; //enable DMA channel 1
+	//DMA.CH1.CTRLA		|= DMA_CH_ENABLE_bm; //enable DMA channel 1
 	
 	/*Activate Timer */
-	TCC1.CTRLA			= TC_CLKSEL_DIV1_gc; // start timer, and in turn ADC
+	TCC1.CTRLA			= TC_CLKSEL_DIV64_gc; // start timer, and in turn ADC
 }
 
+
+void vConfigureDMADest()
+{
+	while ((DMA.STATUS & DMA_CH0BUSY_bm) != 0);
+	if(targetBuffer)
+	{
+		DMA.CH0.DESTADDR0	= (( (uint16_t) (&buffer_a)) >> 0) & 0xFF;
+		DMA.CH0.DESTADDR1	= (( (uint16_t) (&buffer_a)) >> 8) & 0xFF;
+		bufferBReady = 1;
+		targetBuffer = 0;
+	}
+	else
+	{
+		DMA.CH0.DESTADDR0	= (( (uint16_t) (&buffer_b)) >> 0) & 0xFF;
+		DMA.CH0.DESTADDR1	= (( (uint16_t) (&buffer_b)) >> 8) & 0xFF;
+		bufferAReady = 1;
+		targetBuffer = 1;
+	}
+	DMA.CH0.CTRLA		|= DMA_CH_ENABLE_bm;
+}
 
 
 ISR(DMA_CH0_vect)
-	{
- 		DMA.INTFLAGS = DMA_CH0TRNIF_bm;
-		PORTF.OUTTGL = 0x01;
-		
-		BaseType_t xHigherPriorityTaskWoken;
-
-		/* xHigherPriorityTaskWoken must be initialised to pdFALSE. */
-		xHigherPriorityTaskWoken = pdFALSE;
-
-		/* Set bit 0 and bit 4 in xEventGroup. */
-		xEventGroupSetBitsFromISR(
-									xDMAProcessEventGroup,   /* The event group being updated. */
-									DMA_EVT_GRP_BufferA, /* The bits being set. */
-									&xHigherPriorityTaskWoken );
-	
-	}
-
-ISR(DMA_CH1_vect)
-	//else if (!(DMA.INTFLAGS & DMA_CH0TRNIF_bm))
 {
-		//Interrupt quittieren
-		DMA.INTFLAGS = DMA_CH1TRNIF_bm;
-		PORTF.OUTTGL = 0x02;
-
-		BaseType_t xHigherPriorityTaskWoken;
-
-		/* xHigherPriorityTaskWoken must be initialised to pdFALSE. */
-		xHigherPriorityTaskWoken = pdFALSE;
-
-		/* Set bit 0 and bit 4 in xEventGroup. */
-		xEventGroupSetBitsFromISR(
-									xDMAProcessEventGroup,   /* The event group being updated. */
-									DMA_EVT_GRP_BufferB, /* The bits being set. */
-									&xHigherPriorityTaskWoken );
+ 	DMA.INTFLAGS = DMA_CH0TRNIF_bm;
+	PORTF.OUTTGL = 0x01;		
+	if(ucStopDMA != 1) vConfigureDMADest();
 }
+

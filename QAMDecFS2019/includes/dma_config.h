@@ -11,10 +11,15 @@
 
 void vInitDMA();
 
-#define DMA_BUF_LEN	256
+#define DMA_BUF_LEN	128
 
 extern volatile uint8_t buffer_a[];
 extern volatile uint8_t buffer_b[];
+
+extern volatile uint8_t ucStopDMA;
+
+extern volatile uint8_t bufferAReady;
+extern volatile uint8_t bufferBReady;
 
 //int xtest_array_length;
 //float xtest_array[96]; /*for testing*/

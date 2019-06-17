@@ -57,7 +57,7 @@ int main(void)
 	vInitDisplay();
 	vInitDMA();	
 	
-	xTaskCreate( vProtocolHandlerTask, (const char *) "ProtocolHandlerTask", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
+	//xTaskCreate( vProtocolHandlerTask, (const char *) "ProtocolHandlerTask", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
 	//xTaskCreate( vMenu, (const char *) "Menu", configMINIMAL_STACK_SIZE, NULL, 1, &xMenu);
 	//xTaskCreate( vOutput, (const char *) "IMU", configMINIMAL_STACK_SIZE, NULL, 1, &xIO);
 	//xTaskCreate( vTestpattern, (const char *) "IMU", configMINIMAL_STACK_SIZE, NULL, 1, &xTestpattern);
